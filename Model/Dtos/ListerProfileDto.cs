@@ -1,12 +1,13 @@
-﻿namespace EazyOnRent.Model.API_Model
+﻿namespace EazyOnRent.Model.Dtos
 {
-    public class ListerModel
+    public class ListerProfileDto
     {
-        public int? ListerId { get; set; }
+        public int ListerId { get; set; }
         public string? CompanyName { get; set; }
         public string? Tags { get; set; }
         public string? Address { get; set; }
-        public string? Mobile { get; set; }
+
+        public readonly string? Mobile;
         public string? Email { get; set; }
         public string? DefaultImage { get; set; }
         public string? Descriptions { get; set; }
@@ -18,8 +19,7 @@
         public double? Long { get; set; }
         public string? LatLongAddress { get; set; }
 
+
         public IFormFile? ImageFile { get; set; }
-        //public string? ImageBase64Str { get; set; }
-        //public string? ImageFileExtn { get; set; }
     }
 }

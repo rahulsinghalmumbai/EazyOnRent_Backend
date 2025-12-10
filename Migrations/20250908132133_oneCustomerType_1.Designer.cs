@@ -4,6 +4,7 @@ using EazyOnRent.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EazyOnRent.Migrations
 {
     [DbContext(typeof(EazyOnRentContext))]
-    partial class EazyOnRentContextModelSnapshot : ModelSnapshot
+    [Migration("20250908132133_oneCustomerType_1")]
+    partial class oneCustomerType_1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,43 +44,6 @@ namespace EazyOnRent.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("EazyOnRent.Model.ChatMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReceiverId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ChatMessages");
-                });
-
             modelBuilder.Entity("EazyOnRent.Model.ItemImage", b =>
                 {
                     b.Property<int?>("ImageId")
@@ -85,9 +51,6 @@ namespace EazyOnRent.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("ImageId"));
-
-                    b.Property<byte[]>("ImageData")
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ImageName")
                         .HasColumnType("nvarchar(max)");
@@ -263,6 +226,9 @@ namespace EazyOnRent.Migrations
                     b.Property<int?>("ItemId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ListerId")
+                        .HasColumnType("int");
+
                     b.Property<double?>("Rating")
                         .HasColumnType("float");
 
@@ -271,9 +237,6 @@ namespace EazyOnRent.Migrations
 
                     b.Property<DateTime?>("RentToDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("RenterId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Review")
                         .HasColumnType("nvarchar(max)");
@@ -299,9 +262,6 @@ namespace EazyOnRent.Migrations
 
                     b.Property<DateTime?>("ViewDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("ViewerCategory")
-                        .HasColumnType("int");
 
                     b.Property<int?>("viewerID")
                         .HasColumnType("int");

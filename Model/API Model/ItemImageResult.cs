@@ -5,8 +5,10 @@
         public int? ImageId { get; set; }
         public int? ListerItemId { get; set; }
         public string? ImageName { get; set; }
-        public string? ImageBase64Str { get; set; }
-        public string? ImageFileExtn { get; set; }
+        //public string? ImageBase64Str { get; set; }
+        //public string? ImageFileExtn { get; set; }
+
+        public List<IFormFile> ImageFiles { get; set; }
 
     }
 }
