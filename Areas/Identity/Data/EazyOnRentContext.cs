@@ -30,4 +30,5 @@ public class EazyOnRentContext : IdentityDbContext<IdentityUser>
     public DbSet<ItemImage> ItemImages { get; set; }
     public DbSet<Categorie> Categories { get; set; }
     public DbSet<dbViewed> dbVieweds { get; set; }
+    public DbSet<ChatMessage> ChatMessages { get; set; }
 }
