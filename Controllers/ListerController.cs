@@ -286,16 +286,16 @@ namespace EazyOnRent.Controllers
                     return result;
                 }
 
-                if (Status != null && (Status < 0 || Status > 3))
-                {
-                    result.ResponseCode = "999";
-                    result.ResponseMessage = "Please enter is valid status (For Visible:1, Not Visible:2, Discountune:3)";
-                    result.ItemList = null;
-                    return result;
-                }
+                //if (Status != null && (Status < 0 || Status > 3))
+                //{
+                //    result.ResponseCode = "999";
+                //    result.ResponseMessage = "Please enter is valid status (For Visible:1, Not Visible:2, Discountune:3)";
+                //    result.ItemList = null;
+                //    return result;
+                //}
 
                 var listerResult = await _context.Listers
-                    .Where(x => x.ListerId == ListerId && x.Status == true)
+                    .Where(x => x.ListerId == ListerId)
                     .FirstOrDefaultAsync();
                 if (listerResult == null)
                 {
@@ -317,7 +317,7 @@ namespace EazyOnRent.Controllers
                 else
                 {
                     itemlistDbResult = await _context.ListerItems
-                        .Where(x => x.ListerId == ListerId && x.Status == Status)
+                        .Where(x => x.ListerId == ListerId)
                         .ToListAsync();
                 }
 
@@ -389,6 +389,109 @@ namespace EazyOnRent.Controllers
         }
 
 
+        //[HttpGet("GetItemById")]
+        //public async Task<dynamic> GetItemById(int ListerId, int ItemId)
+        //{
+        //    dynamic result = new ExpandoObject();
+        //    try
+        //    {
+        //        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+        //        if (ListerId <= 0)
+        //        {
+        //            result.ResponseCode = "999";
+        //            result.ResponseMessage = "Please enter is valid ListerId.";
+        //            return result;
+        //        }
+
+        //        var listerResult = await _context.Listers
+        //            .Where(x => x.ListerId == ListerId && x.Status == true)
+        //            .FirstOrDefaultAsync();
+        //        if (listerResult == null)
+        //        {
+        //            result.ResponseCode = "999";
+        //            result.ResponseMessage = "ListerId is not found..";
+        //            result.ItemList = null;
+        //            return result;
+        //        }
+
+        //        if (ItemId <= 0)
+        //        {
+        //            result.ResponseCode = "999";
+        //            result.ResponseMessage = "Please enter is valid ItemId.";
+        //            return result;
+        //        }
+
+        //        var item = await _context.ListerItems
+        //            .Include(x => x.Lister)
+        //            .Where(x => x.ListerId == ListerId && x.ListerItemId == ItemId)
+        //            .FirstOrDefaultAsync();
+
+        //        if (item != null)
+        //        {
+        //            // Get Images
+        //            var itemImageList = await _context.ItemImages
+        //                .Where(x => x.ListerItemId == item.ListerItemId)
+        //                .Select(x => new ItemImageResult
+        //                {
+        //                    ImageId = x.ImageId,
+        //                    ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
+        //                })
+        //                .ToListAsync();
+        //            //End Get Images 
+
+        //            var viewCount = await _context.dbVieweds.CountAsync(x => x.ListerItemID == item.ListerItemId);
+        //            var bookCount = await _context.RenterItems.CountAsync(x => x.ItemId == item.ListerItemId);
+        //            var reviews = await _context.RenterItems
+        //                .Where(x => x.ItemId == item.ListerItemId && !string.IsNullOrEmpty(x.Review))
+        //                .Select(x => x.Review)
+        //                .ToListAsync();
+        //            var averageRating = await _context.RenterItems
+        //                .Where(x => x.ItemId == item.ListerItemId && x.Rating.HasValue)
+        //                .AverageAsync(x => x.Rating);
+
+        //            List<ListerItemResult> itemlist = new List<ListerItemResult>();
+        //            ListerItemResult list = new ListerItemResult();
+        //            list.ListerItemId = item.ListerItemId;
+        //            list.ItemName = item.ItemName;
+        //            list.ListerId = item.ListerId;
+        //            list.ItemCost = item.ItemCost;
+        //            list.ItemDescriptions = item.ItemDescriptions;
+        //            list.Availablefrom = item.Availablefrom;
+        //            list.Status = item.Status;
+        //            list.CategoryId = item.CategoryId;
+        //            list.CreatedDate = item.CreatedDate;
+        //            list.UpdatedOn = item.UpdatedOn;
+        //            list.CompanyName = item.Lister?.CompanyName ?? "No Company Name";
+        //            list.bookCount = bookCount;
+        //            list.viewCount = viewCount;
+        //            list.Review = reviews.Any() ? reviews : new List<string> { "No any Review yet!" };
+        //            list.StarRating = averageRating;
+        //            list.ItemImageList = itemImageList;
+
+        //            itemlist.Add(list);
+
+        //            result.ResponseCode = "000";
+        //            result.ResponseMessage = "Success";
+        //            result.ItemList = itemlist;
+        //        }
+        //        else
+        //        {
+        //            result.ResponseCode = "999";
+        //            result.ResponseMessage = "No item found.";
+        //            result.ItemList = null;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.ResponseCode = "999";
+        //        result.ResponseMessage = ex.Message;
+        //        result.ItemList = null;
+        //    }
+        //    return result;
+        //}
+
+
         [HttpGet("GetItemById")]
         public async Task<dynamic> GetItemById(int ListerId, int ItemId)
         {
@@ -439,17 +542,30 @@ namespace EazyOnRent.Controllers
                             //ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
                         })
                         .ToListAsync();
-                    //End Get Images 
+                    // End Get Images 
 
                     var viewCount = await _context.dbVieweds.CountAsync(x => x.ListerItemID == item.ListerItemId);
                     var bookCount = await _context.RenterItems.CountAsync(x => x.ItemId == item.ListerItemId);
+
                     var reviews = await _context.RenterItems
                         .Where(x => x.ItemId == item.ListerItemId && !string.IsNullOrEmpty(x.Review))
                         .Select(x => x.Review)
                         .ToListAsync();
-                    var averageRating = await _context.RenterItems
+
+                    // Safe average calculation (avoid exception when no ratings)
+                    var ratingList = await _context.RenterItems
                         .Where(x => x.ItemId == item.ListerItemId && x.Rating.HasValue)
-                        .AverageAsync(x => x.Rating);
+                        .Select(x => x.Rating.Value)
+                        .ToListAsync();
+
+                    double? averageRating = null;
+                    if (ratingList != null && ratingList.Count > 0)
+                        averageRating = ratingList.Average();
+
+                    // Fetch category details (by item.CategoryId)
+                    var category = await _context.Categories
+                        .Where(c => c.Id == item.CategoryId)
+                        .FirstOrDefaultAsync();
 
                     List<ListerItemResult> itemlist = new List<ListerItemResult>();
                     ListerItemResult list = new ListerItemResult();
@@ -460,7 +576,11 @@ namespace EazyOnRent.Controllers
                     list.ItemDescriptions = item.ItemDescriptions;
                     list.Availablefrom = item.Availablefrom;
                     list.Status = item.Status;
+
+                    // ADD: category id & name (flat fields on DTO)
                     list.CategoryId = item.CategoryId;
+                    list.CategoryName = category?.CategoriesName;
+
                     list.CreatedDate = item.CreatedDate;
                     list.UpdatedOn = item.UpdatedOn;
                     list.CompanyName = item.Lister?.CompanyName ?? "No Company Name";
@@ -494,6 +614,7 @@ namespace EazyOnRent.Controllers
 
 
 
+
         [HttpPost("CreateItem")]
         public async Task<dynamic> CreateItem(ListerItem item)
         {
@@ -507,7 +628,7 @@ namespace EazyOnRent.Controllers
                     return result;
                 }
 
-                var listerResult = await _context.Listers.Where(x => x.ListerId == item.ListerId && x.Status == true).FirstOrDefaultAsync();
+                var listerResult = await _context.Listers.Where(x => x.ListerId == item.ListerId).FirstOrDefaultAsync();
                 if (listerResult == null)
                 {
                     result.ResponseCode = "999";
@@ -554,19 +675,19 @@ namespace EazyOnRent.Controllers
                     return result;
                 }
 
-                if (item.Status <= 0)
-                {
-                    result.ResponseCode = "999";
-                    result.ResponseMessage = "Status is required field";
-                    return result;
-                }
+                //if (item.Status <= 0)
+                //{
+                //    result.ResponseCode = "999";
+                //    result.ResponseMessage = "Status is required field";
+                //    return result;
+                //}
 
-                if (item.Status != null && item.Status < 0 || item.Status > 3)
-                {
-                    result.ResponseCode = "999";
-                    result.ResponseMessage = "Please enter is valid status (For Visible:1, Not Visible:2, Discountune:3)";
-                    return result;
-                }
+                //if (item.Status != null && item.Status < 0 || item.Status > 3)
+                //{
+                //    result.ResponseCode = "999";
+                //    result.ResponseMessage = "Please enter is valid status (For Visible:1, Not Visible:2, Discountune:3)";
+                //    return result;
+                //}
 
                 if (item.Availablefrom == null)
                 {
@@ -782,7 +903,7 @@ namespace EazyOnRent.Controllers
                 }
 
                 var itemResult = await _context.ListerItems
-                    .Where(x => x.ListerItemId == item.ListerItemId && x.Status == 1)
+                    .Where(x => x.ListerItemId == item.ListerItemId)
                     .FirstOrDefaultAsync();
 
                 if (itemResult == null)
@@ -793,12 +914,6 @@ namespace EazyOnRent.Controllers
                     return result;
                 }
 
-                if (item.ImageFiles == null || item.ImageFiles.Count == 0)
-                {
-                    result.ResponseCode = "999";
-                    result.ResponseMessage = "Please upload at least one image.";
-                    return result;
-                }
 
                 string folderName = "itemimages";
                 string folderPath = Path.Combine(AppConfigModel.ImagePath, folderName);
@@ -850,6 +965,112 @@ namespace EazyOnRent.Controllers
             return result;
         }
 
+
+        [HttpPost("updateItemImage")]
+        public async Task<dynamic> UpdateItemImage([FromForm] ItemImageResult item)
+        {
+            dynamic result = new ExpandoObject();
+            try
+            {
+                // Validate required fields
+                if (item.ListerItemId == null || item.ListerItemId <= 0)
+                {
+                    result.ResponseCode = "999";
+                    result.ResponseMessage = "ListerItemId is required field.";
+                    return result;
+                }
+
+                // Check if ListerItem exists
+                var itemResult = await _context.ListerItems
+                    .Where(x => x.ListerItemId == item.ListerItemId)
+                    .FirstOrDefaultAsync();
+
+                if (itemResult == null)
+                {
+                    result.ResponseCode = "999";
+                    result.ResponseMessage = "ListerItemId is not found.";
+                    return result;
+                }
+
+                // Validate new image file
+                if (item.ImageFiles == null || item.ImageFiles.Count == 0)
+                {
+                    result.ResponseCode = "999";
+                    result.ResponseMessage = "Image file is required.";
+                    return result;
+                }
+
+                string folderName = "itemimages";
+                string folderPath = Path.Combine(AppConfigModel.ImagePath, folderName);
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                // ✅ Try to find existing image
+                var existingImage = (item.ImageId != null && item.ImageId > 0)
+                    ? await _context.ItemImages
+                        .Where(x => x.ImageId == item.ImageId && x.ListerItemId == item.ListerItemId)
+                        .FirstOrDefaultAsync()
+                    : null;
+
+                var file = item.ImageFiles[0];
+                string ext = Path.GetExtension(file.FileName).ToLower();
+                string newFileName = $"{DateTime.Now:ddMMyyyyHHmmssfff}_{Guid.NewGuid()}{ext}";
+                string newFilePath = Path.Combine(folderPath, newFileName);
+
+                // Save new image file to server
+                using (var stream = new FileStream(newFilePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                string dbPath = $"{folderName}/{newFileName}";
+
+                if (existingImage != null)
+                {
+
+                    // Delete old image file from server
+                    string oldFilePath = Path.Combine(AppConfigModel.ImagePath, existingImage.ImageName);
+                    if (System.IO.File.Exists(oldFilePath))
+                        System.IO.File.Delete(oldFilePath);
+
+                    existingImage.ImageName = dbPath;
+                    _context.ItemImages.Update(existingImage);
+                    await _context.SaveChangesAsync();
+
+                    result.ResponseCode = "000";
+                    result.ResponseMessage = "Image updated successfully.";
+                    result.ImageId = existingImage.ImageId;
+                    result.NewImageName = dbPath;
+                    result.Action = "Updated";
+                }
+                else
+                {
+                    // ✅ INSERT — No image record found, add as new image
+
+                    var newImage = new ItemImage
+                    {
+                        ListerItemId = item.ListerItemId,
+                        ImageName = dbPath
+                    };
+
+                    await _context.ItemImages.AddAsync(newImage);
+                    await _context.SaveChangesAsync();
+
+                    result.ResponseCode = "000";
+                    result.ResponseMessage = "Image added successfully.";
+                    result.ImageId = newImage.ImageId;
+                    result.NewImageName = dbPath;
+                    result.Action = "Inserted";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.ResponseCode = "999";
+                result.ResponseMessage = ex.Message;
+            }
+            return result;
+        }
 
         //[HttpPost("editItemImage")]
         //public async Task<dynamic> EditItemImage(ItemImageResult item)
@@ -994,8 +1215,13 @@ namespace EazyOnRent.Controllers
         }
 
 
+
+
         [HttpGet("GetGuestItems")]
-        public async Task<dynamic> GetGuestItems()
+        public async Task<dynamic> GetGuestItems(
+     int? categoryId,
+     string? companyName
+     )
         {
             dynamic result = new ExpandoObject();
             try
@@ -1003,16 +1229,30 @@ namespace EazyOnRent.Controllers
                 var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
                 List<ListerItemResult> itemlist = new List<ListerItemResult>();
-                var itemlistDbResult = await _context.ListerItems
-                    .Include(x => x.Lister)
-                    .Where(x => x.Status == 1)
-                    .OrderByDescending(x => x.CreatedDate)
-                    .Take(20)
-                    .ToListAsync();
 
+               
+
+
+                var itemlistDbResult = await _context.ListerItems
+    .Include(x => x.Lister)
+
+    .Where(x =>
+        x.Status == 1 &&
+
+        (!categoryId.HasValue || x.CategoryId == categoryId.Value) &&
+
+        (
+            string.IsNullOrEmpty(companyName) ||
+            x.Lister.CompanyName.Contains(companyName) ||
+            x.ItemName.Contains(companyName)
+        )
+    )
+
+    .OrderByDescending(x => x.CreatedDate)
+    .Take(20)
+    .ToListAsync();
                 foreach (var item in itemlistDbResult)
                 {
-                    // Get Images
                     var itemImageList = await _context.ItemImages
                         .Where(x => x.ListerItemId == item.ListerItemId)
                         .Select(x => new ItemImageResult
@@ -1024,14 +1264,21 @@ namespace EazyOnRent.Controllers
                         })
                         .ToListAsync();
 
-                    var viewCount = await _context.dbVieweds.CountAsync(x => x.ListerItemID == item.ListerItemId);
-                    var bookCount = await _context.RenterItems.CountAsync(x => x.ItemId == item.ListerItemId);
-                   
+                    var category1 = await _context.Categories
+                        .Where(c => c.Id == item.CategoryId)
+                        .FirstOrDefaultAsync();
+
+                    var viewCount = await _context.dbVieweds
+                        .CountAsync(x => x.ListerItemID == item.ListerItemId);
+
+                    var bookCount = await _context.RenterItems
+                        .CountAsync(x => x.ItemId == item.ListerItemId);
+
                     var reviews = await _context.RenterItems
                         .Where(x => x.ItemId == item.ListerItemId && !string.IsNullOrEmpty(x.Review))
                         .Select(x => x.Review)
                         .ToListAsync();
-                  
+
                     var averageRating = await _context.RenterItems
                         .Where(x => x.ItemId == item.ListerItemId && x.Rating.HasValue)
                         .AverageAsync(x => x.Rating);
@@ -1044,7 +1291,8 @@ namespace EazyOnRent.Controllers
                     list.ItemDescriptions = item.ItemDescriptions;
                     list.Availablefrom = item.Availablefrom;
                     list.Status = item.Status;
-                    list.CategoryId = item.CategoryId;
+                    list.CategoryId = category1.Id;
+                    list.CategoryName = category1?.CategoriesName;
                     list.CreatedDate = item.CreatedDate;
                     list.UpdatedOn = item.UpdatedOn;
                     list.ItemImageList = itemImageList;
@@ -1056,6 +1304,7 @@ namespace EazyOnRent.Controllers
 
                     itemlist.Add(list);
                 }
+
                 if (itemlist.Count > 0)
                 {
                     result.ResponseCode = "000";
@@ -1075,8 +1324,57 @@ namespace EazyOnRent.Controllers
                 result.ResponseMessage = ex.Message;
                 result.ItemList = null;
             }
+
             return result;
         }
+
+        [HttpPost("editListerItem")]
+        public async Task<dynamic> EditListerItem([FromQuery] int ListerItemId,[FromQuery] int ListerId,[FromBody] ListerItem item)
+        {
+            dynamic result = new ExpandoObject();
+            try
+            {
+                if (ListerItemId <= 0 && ListerId <= 0)
+                {
+                    result.ResponseCode = "999";
+                    result.ResponseMessage = "Please enter is valid ListerItemId and ListerId.";
+                    return result;
+                }
+                var itemResult = await _context.ListerItems
+             .Where(x => x.ListerItemId == ListerItemId
+                      && x.ListerId == ListerId)
+             .FirstOrDefaultAsync();
+                if (itemResult == null)
+                {
+                    result.ResponseCode = "999";
+                    result.ResponseMessage = "ListerItemId is not found.";
+                    result.ItemList = null;
+                    return result;
+                }
+                itemResult.ItemName = item.ItemName;
+                itemResult.ItemCost = item.ItemCost;
+                itemResult.ItemDescriptions = item.ItemDescriptions;
+                itemResult.Availablefrom = item.Availablefrom;
+                itemResult.Status = item.Status;
+                itemResult.CategoryId = item.CategoryId;
+                itemResult.UpdatedOn = DateTime.Now.Date;
+                var UpdateData = await _context.SaveChangesAsync();
+                result.ResponseCode = "000";
+                result.ResponseMessage = "Success";
+                result.UpdateData = ListerItemId;
+            }
+            catch (Exception ex)
+            {
+                result.ResponseCode = "999";
+                result.ResponseMessage = ex.Message;
+                result.ListerItemId = null;
+            }
+            finally
+            {
+            }
+            return result;
+        }
+
 
 
         [HttpGet("GetSimilarItems")]
@@ -1191,6 +1489,111 @@ namespace EazyOnRent.Controllers
         }
 
 
+        //[HttpGet("bookHistory")]
+        //public async Task<IActionResult> GetBookedItemHistoryByLister(int ListerId)
+        //{
+        //    try
+        //    {
+        //        if (ListerId <= 0)
+        //        {
+        //            return Ok(new
+        //            {
+        //                ResponseCode = "999",
+        //                ResponseMessage = "Please enter valid ListerId.",
+        //                Data = new List<BookedItemHistory>()
+        //            });
+        //        }
+
+        //        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+        //        var history = await (
+        //            from renter in _context.RenterItems
+        //            join item in _context.ListerItems
+        //                on renter.ItemId equals item.ListerItemId
+        //            join lister in _context.Listers
+        //                on item.ListerId equals lister.ListerId
+        //            where item.ListerId == ListerId
+        //            select new BookedItemHistory
+        //            {
+        //                RenterItemId = renter.RenterItemId,
+        //                // RenterId = renter.RenterId ?? 0,
+        //                ListerId = lister.ListerId,
+        //                ItemId = item.ListerItemId,
+
+        //                RentFromDate = renter.RentFromDate,
+        //                RentToDate = renter.RentToDate,
+        //                BookingStatus = renter.Status,
+
+        //                ItemName = item.ItemName,
+        //                ItemCost = item.ItemCost,
+        //                ItemDescriptions = item.ItemDescriptions,
+
+
+        //                ListerName = lister.Name,
+        //                CompanyName = lister.CompanyName
+        //            }
+        //        )
+        //        .OrderByDescending(x => x.RentFromDate)
+        //        .ToListAsync();
+
+        //        if (!history.Any())
+        //        {
+        //            return Ok(new
+        //            {
+        //                ResponseCode = "999",
+        //                ResponseMessage = "No booking history found.",
+        //                Data = new List<BookedItemHistory>()
+        //            });
+        //        }
+
+        //        var itemIds = history.Select(h => h.ItemId).Distinct().ToList();
+
+        //        var imagesDict = await _context.ItemImages
+        //             .Where(x => x.ListerItemId.HasValue
+        //                 && itemIds.Contains(x.ListerItemId.Value))
+        //             .GroupBy(x => x.ListerItemId!.Value)
+        //             .ToDictionaryAsync(
+        //                 g => g.Key,
+        //                 g => g.Select(img =>
+        //                     $"{baseUrl}/images/{img?.ImageName.Replace("\\", "/")}"
+        //                 ).ToList()
+        //             );
+
+
+        //        foreach (var h in history)
+        //        {
+        //            if (h.ItemId.HasValue &&
+        //                imagesDict.TryGetValue(h.ItemId.Value, out var imgList))
+        //            {
+        //                h.ItemImages = imgList;
+        //            }
+        //            else
+        //            {
+        //                h.ItemImages = new List<string>();
+        //            }
+        //        }
+
+
+        //        return Ok(new
+        //        {
+        //            ResponseCode = "000",
+        //            ResponseMessage = "Success",
+        //            Data = history
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new
+        //        {
+        //            ResponseCode = "500",
+        //            ResponseMessage = "Error: " + ex.Message,
+        //            Data = new List<BookedItemHistory>()
+        //        });
+        //    }
+        //}
+
+
+
         [HttpGet("bookHistory")]
         public async Task<IActionResult> GetBookedItemHistoryByLister(int ListerId)
         {
@@ -1208,37 +1611,37 @@ namespace EazyOnRent.Controllers
 
                 var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
-                var history = await (
-                    from renter in _context.RenterItems
-                    join item in _context.ListerItems
-                        on renter.ItemId equals item.ListerItemId
-                    join lister in _context.Listers
-                        on item.ListerId equals lister.ListerId
-                    where item.ListerId == ListerId
-                    select new BookedItemHistory
+                var query = await (
+                    from lister in _context.Listers
+                    join listerItem in _context.ListerItems
+                        on lister.ListerId equals listerItem.ListerId
+                    join renterItem in _context.RenterItems
+                        on listerItem.ListerItemId equals renterItem.ItemId
+                    join itemImage in _context.ItemImages
+                        on listerItem.ListerItemId equals itemImage.ListerItemId into imgGroup
+                    from img in imgGroup.DefaultIfEmpty() // LEFT JOIN
+                    where renterItem.RenterId == ListerId
+                    select new
                     {
-                        RenterItemId = renter.RenterItemId,
-                        // RenterId = renter.RenterId ?? 0,
-                        ListerId = lister.ListerId,
-                        ItemId = item.ListerItemId,
+                        renterItem.RenterItemId,
+                        renterItem.RenterId,
+                        renterItem.ItemId,
+                        renterItem.RentFromDate,
+                        renterItem.RentToDate,
+                        renterItem.Status,
 
-                        RentFromDate = renter.RentFromDate,
-                        RentToDate = renter.RentToDate,
-                        BookingStatus = renter.Status,
+                        lister.Name,
+                        lister.CompanyName,
 
-                        ItemName = item.ItemName,
-                        ItemCost = item.ItemCost,
-                        ItemDescriptions = item.ItemDescriptions,
+                        listerItem.ItemName,
+                        listerItem.ItemCost,
+                        listerItem.ItemDescriptions,
 
-                        
-                        ListerName = lister.Name,
-                        CompanyName = lister.CompanyName
+                        ImageName = img != null ? img.ImageName : null
                     }
-                )
-                .OrderByDescending(x => x.RentFromDate)
-                .ToListAsync();
+                ).ToListAsync();
 
-                if (!history.Any())
+                if (!query.Any())
                 {
                     return Ok(new
                     {
@@ -1248,39 +1651,38 @@ namespace EazyOnRent.Controllers
                     });
                 }
 
-                var itemIds = history.Select(h => h.ItemId).Distinct().ToList();
-
-                var imagesDict = await _context.ItemImages
-                     .Where(x => x.ListerItemId.HasValue
-                         && itemIds.Contains(x.ListerItemId.Value))
-                     .GroupBy(x => x.ListerItemId!.Value)
-                     .ToDictionaryAsync(
-                         g => g.Key,
-                         g => g.Select(img =>
-                             $"{baseUrl}/images/{img?.ImageName.Replace("\\", "/")}"
-                         ).ToList()
-                     );
-
-
-                foreach (var h in history)
-                {
-                    if (h.ItemId.HasValue &&
-                        imagesDict.TryGetValue(h.ItemId.Value, out var imgList))
+                var result = query
+                    .GroupBy(x => x.RenterItemId)
+                    .Select(g => new BookedItemHistory
                     {
-                        h.ItemImages = imgList;
-                    }
-                    else
-                    {
-                        h.ItemImages = new List<string>();
-                    }
-                }
+                        RenterItemId = g.Key,
+                        RenterId = g.First().RenterId,
+                        ItemId = g.First().ItemId,
 
+                        RentFromDate = g.First().RentFromDate,
+                        RentToDate = g.First().RentToDate,
+                        BookingStatus = g.First().Status,
+
+                        ItemName = g.First().ItemName,
+                        ItemCost = g.First().ItemCost,
+                        ItemDescriptions = g.First().ItemDescriptions,
+
+                        ListerName = g.First().Name,
+                        CompanyName = g.First().CompanyName,
+
+                        ItemImages = g
+                            .Where(x => x.ImageName != null)
+                            .Select(x => $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}")
+                            .ToList()
+                    })
+                    .OrderByDescending(x => x.RentFromDate)
+                    .ToList();
 
                 return Ok(new
                 {
                     ResponseCode = "000",
                     ResponseMessage = "Success",
-                    Data = history
+                    Data = result
                 });
             }
             catch (Exception ex)
@@ -1293,9 +1695,6 @@ namespace EazyOnRent.Controllers
                 });
             }
         }
-
-
-
 
     }
 }

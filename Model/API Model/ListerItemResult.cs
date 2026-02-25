@@ -21,8 +21,12 @@
         public int? Status { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedOn { get; set; }
+        //public int? CategoryId { get; set; }
         public int? CategoryId { get; set; }
-        
+        public string? CategoryName { get; set; }
+
         public List<ItemImageResult> ItemImageList { get; set; }
     }
+
+   
 }
