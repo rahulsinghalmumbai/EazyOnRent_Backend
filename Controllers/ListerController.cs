@@ -538,7 +538,8 @@ namespace EazyOnRent.Controllers
                         .Select(x => new ItemImageResult
                         {
                             ImageId = x.ImageId,
-                            ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
+                            ImageName = $"/images/{x.ImageName.Replace("\\", "/")}"
+                          //  ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
                         })
                         .ToListAsync();
                     // End Get Images 
@@ -731,7 +732,17 @@ namespace EazyOnRent.Controllers
             }
             return result;
         }
+        [HttpGet("CheckItemName")]
+        public async Task<IActionResult> CheckItemName(string itemName, int listerId)
+        {
+            if (string.IsNullOrEmpty(itemName) || listerId <= 0)
+                return Ok(new { exists = false });
 
+            var exists = await _context.ListerItems
+                .AnyAsync(x => x.ItemName == itemName && x.ListerId == listerId);
+
+            return Ok(new { exists });
+        }
 
         [HttpPost("EditItem")]
         public async Task<dynamic> EditItem(ListerItem item)
@@ -956,6 +967,7 @@ namespace EazyOnRent.Controllers
 
 
         [HttpPost("updateItemImage")]
+
         public async Task<dynamic> UpdateItemImage([FromForm] ItemImageResult item)
         {
             dynamic result = new ExpandoObject();
@@ -1248,6 +1260,8 @@ namespace EazyOnRent.Controllers
                         {
                             ImageId = x.ImageId,
                             ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
+                            //ImageName = $"/images/{x.ImageName.Replace("\\", "/")}"
+
                         })
                         .ToListAsync();
 

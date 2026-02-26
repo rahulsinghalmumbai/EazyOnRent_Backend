@@ -52,17 +52,23 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+// Default wwwroot (optional but safe)
+app.UseStaticFiles();
+
+// Custom Physical Folder Mapping
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        @"C:\HostingSpaces\Ssharad\eazyonrent.com\data"),
+    RequestPath = "/images",
+    ServeUnknownFileTypes = true
+});
+
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/chatHub");
-
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(AppConfigModel.ImagePath),
-    RequestPath = "/images",  
-    ServeUnknownFileTypes = true
-});
 
 app.Run();
