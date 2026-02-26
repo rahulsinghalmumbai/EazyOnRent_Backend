@@ -539,7 +539,7 @@ namespace EazyOnRent.Controllers
                         {
                             ImageId = x.ImageId,
                             ImageName = $"/images/{x.ImageName.Replace("\\", "/")}"
-                            //ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
+                          //  ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
                         })
                         .ToListAsync();
                     // End Get Images 
@@ -967,6 +967,7 @@ namespace EazyOnRent.Controllers
 
 
         [HttpPost("updateItemImage")]
+
         public async Task<dynamic> UpdateItemImage([FromForm] ItemImageResult item)
         {
             dynamic result = new ExpandoObject();
@@ -1258,8 +1259,8 @@ namespace EazyOnRent.Controllers
                         .Select(x => new ItemImageResult
                         {
                             ImageId = x.ImageId,
-                            //ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
-                            ImageName = $"/images/{x.ImageName.Replace("\\", "/")}"
+                            ImageName = $"{baseUrl}/images/{x.ImageName.Replace("\\", "/")}"
+                            //ImageName = $"/images/{x.ImageName.Replace("\\", "/")}"
 
                         })
                         .ToListAsync();
